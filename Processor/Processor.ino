@@ -14,9 +14,16 @@ signed int stanSwitch = 0; //signed, bo nie przyjmuje wartości ujemnych
 //zmienna czasowa.
 signed int czas;
 //Deklaracje funkcji, inaczej tablica wskaznikow nie zadziala, kompilator musi wiedziec wczesniej.
+void Wywolywanie();
+void Przerywanie();
+void Utrwalanie();
+void Plukanie();
+void Uzytkownika();
+void Predefined_D74();
 //deklaracja tablicy programów
-String programy[] = {"Wywolywanie", "Przerywanie", "Utrwalanie", "Plukanie", "Uzytkownika"}; //tablica Stringów, słowo to jeden obiekt
+String programy[] = {"Wywolywanie", "Przerywanie", "Utrwalanie", "Plukanie", "Uzytkownika", "Predefined D-74"}; //tablica Stringów, słowo to jeden obiekt
 //definicja tablicy wskaznikow do programow.
+void (*programy_wskazniki[])(void) = {Wywolywanie, Przerywanie, Utrwalanie, Plukanie, Uzytkownika, Predefined_D74};
 void setup()
 {
   /*Deklaracja przycisków*/
@@ -36,7 +43,7 @@ void setup()
 void loop() //pętla główna.
 {
   Menu();
-  Init(); //init wywołuje funkcję program.
+  Init(); //init wywołuje funkcje
 }
 void Menu(){
   int StanPrzycisku_1 = 0;
@@ -86,24 +93,25 @@ void Init(){
       break;
     }
   } /*czytaj: jezeli nie przerwano - kontynuuj*/
-  if(!znacznik_przerwania) Program(programy[stanSwitch]); //argument funkcji programy to string z nazwa wybranego programu.
+   if(znacznik_przerwania) programy_wskazniki[stanSwitch](); //argument funkcji programy to string z nazwa wybranego programu.
 }
-void Program(String funkcja){ //string zostaje przejety tylko i wylacznie po to by wyswietlic dobry komunikat na ekran.
+//następująca funkcja posiada dwa argumenty domniemane.
+void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 0){ //string zostaje przejety tylko i wylacznie po to by wyswietlic dobry komunikat na ekran.
   /****************************************************************/
   /*zerujemy stany*/
   
   int StanPrzycisku_1 = 0;
   int StanPrzycisku_2 = 0;
   int StanPrzycisku_3 = 0;
-  
+  String SPWM, Stme, StmeB; //PWM,Sekundy w string.
+  unsigned int PWM = 40;
+  unsigned long time1, time2; //lokalny czas funkcji wywolanie.
+  bool K1 = 0,K2 = 1; //inicjalnie: false
+  if (!BreakTime && !WTime){ //warunek sprawdzający czy argumenty zostały domniemane czy nie.
   /****************************************************************/
   unsigned int znacznik_opcji = 0; //liczymy do 2 (3 - 0,1,2)
   // bool znacznik_przerwania = 0; //w tym podprogramie nie można przerywać - ograniczenie sprzętowe.
   bool znacznik_zatwierdzenia =0;
-  bool K1 = 0,K2 = 1; //inicjalnie: false
-  unsigned int PWM = 40;
-  unsigned long BreakTime = 0, WTime = 0, time1, time2; //lokalny czas funkcji wywolanie.
-  String SPWM, Stme, StmeB; //PWM,Sekundy w string.
   lcd.clear(); //czysc ekran przed wejsciem do petli, inaczej wystapia artefakty.
   while(znacznik_opcji != 2){ //pętla przyjmujaca czas wykonywania wywolywania
     //przyciski, bez nich nie wyjdziesz z petli, nie zmienisz czasu.
@@ -171,6 +179,7 @@ void Program(String funkcja){ //string zostaje przejety tylko i wylacznie po to 
         znacznik_opcji = 3; 
         delay(140);} break;
     }
+    }
   }
   
   /********************************************************************/
@@ -223,4 +232,24 @@ void Program(String funkcja){ //string zostaje przejety tylko i wylacznie po to 
   lcd.print(funkcja);
   delay(2000);
 }
+void Wywolywanie(){
+    Program("Wywoływanie");
+}
+void Przerywanie(){
+    Program("Przerywanie");
+}
+void Utrwalanie(){
+    Program("Utrwalanie");
+}
+void Plukanie(){
+    Program("Plukanie");
+}
+void Uzytkownika(){
+    Program("Uzytkownika");
+}
+void Predefined_D74(){
+    Program("Wywolywanie", 5000, 130000);
+    Program("Przerywanie", 5000, 300);
+    Program("Utrwalanie", 5000, 7000);
+};
 /********************************************************************/
