@@ -43,11 +43,12 @@ void Menu(){
   int StanPrzycisku_2 = 0;
   int StanPrzycisku_3 = 0;
   lcd.clear();
+  lcd.setCursor(4,0);
   lcd.print("Wybierz");
-  lcd.setCursor(0,1);
+  lcd.setCursor(4,1);
   lcd.print("Program");
   
-  delay(1500); //zapobiega wywołaniu programu.
+  delay(1800); //zapobiega wywołaniu programu.
   do{
     StanPrzycisku_1 = digitalRead(Przycisk_1);
     StanPrzycisku_2 = digitalRead(Przycisk_2);
@@ -128,7 +129,7 @@ void Program(String funkcja){ //string zostaje przejety tylko i wylacznie po to 
       /* wyswietl panel */
       
       lcd.setCursor(0,0);
-      lcd.print("Wykonuj : ");
+      lcd.print("Czas trw.prg:");
       lcd.setCursor(0,1);
       lcd.print("<- OK +> "+ Stme + "[min]"); delay(140);
       if (StanPrzycisku_2){delay(140); znacznik_opcji = 1;delay(140);}break;
@@ -215,9 +216,9 @@ void Program(String funkcja){ //string zostaje przejety tylko i wylacznie po to 
   }analogWrite(Enable_B,PWM=0); //zerujemy PWM dla bezpieczenstwa.
   lcd.clear();
   lcd.setCursor(0,0);
-  lcd.print("Zakonczono");
-  lcd.setCursor(0,1); //drugi wiersz, pierwsza kolumna.
+  lcd.print("Zakonczono prog.");
+  lcd.setCursor((16 - funkcja.length())/2,1); //drugi wiersz, pierwsza kolumna.
   lcd.print(funkcja);
-  delay(1000);
+  delay(2000);
 }
 /********************************************************************/
