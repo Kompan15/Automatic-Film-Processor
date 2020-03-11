@@ -64,15 +64,15 @@ void Menu(){
     if (StanPrzycisku_1) {stanSwitch--;}
     if (StanPrzycisku_3) {stanSwitch++;}
     //warunek kręcący.
-    if (stanSwitch == 5){stanSwitch = 0;}
-    if (stanSwitch == -1){stanSwitch = 4;}
+    if (stanSwitch == 6){stanSwitch = 0;}
+    if (stanSwitch == -1){stanSwitch = 5;}
     
     lcd.clear();
     lcd.setCursor((16- programy[stanSwitch].length())/2,0);
     lcd.print(programy[stanSwitch]);
     lcd.setCursor(0,1);
     lcd.print("<<     OK     >>"); delay(140);
-  }while(!StanPrzycisku_2); //dopóki stan przycisku nie jest HIGH
+  }while(StanPrzycisku_2); //dopóki stan przycisku jest HIGH
 }
 void Init(){
   int StanPrzycisku_2 = 0; //inizjalizacja wartości zmiennej przechowującej stan przycisku na False.
@@ -88,12 +88,12 @@ void Init(){
     lcd.print(programy[stanSwitch] + " za:" + Stme);
     lcd.setCursor(0,1); //drugi wiersz, pierwsza kolumna.
     lcd.print("||  Przerwij  ||");
-    if (StanPrzycisku_2) {
+    if (!StanPrzycisku_2){
       znacznik_przerwania = 1;
       break;
     }
   } /*czytaj: jezeli nie przerwano - kontynuuj*/
-   if(znacznik_przerwania) programy_wskazniki[stanSwitch](); //argument funkcji programy to string z nazwa wybranego programu.
+   if(!znacznik_przerwania) programy_wskazniki[stanSwitch](); //argument funkcji programy to string z nazwa wybranego programu.
 }
 //następująca funkcja posiada dwa argumenty domniemane.
 void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 0){ //string zostaje przejety tylko i wylacznie po to by wyswietlic dobry komunikat na ekran.
@@ -109,6 +109,7 @@ void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 
   bool K1 = 0,K2 = 1; //inicjalnie: false
   if (!BreakTime && !WTime){ //warunek sprawdzający czy argumenty zostały domniemane czy nie.
   /****************************************************************/
+  Serial.println("BreakTime and Wtime true");
   unsigned int znacznik_opcji = 0; //liczymy do 2 (3 - 0,1,2)
   // bool znacznik_przerwania = 0; //w tym podprogramie nie można przerywać - ograniczenie sprzętowe.
   bool znacznik_zatwierdzenia =0;
@@ -121,13 +122,13 @@ void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 
     /******************************************************************************************************/      
     switch(znacznik_opcji){ //switch case
     case 0:
-      if (StanPrzycisku_1 && WTime <16000) { //jeżeli obydwie wartości są True.
+      if (!StanPrzycisku_1 && WTime <16000) { //jeżeli obydwie wartości są True.
         WTime = WTime + 1000; //1000 to jedna sec
         delay(100);
         lcd.clear();
       }
       
-      if (StanPrzycisku_3 && WTime != 0) {
+      if (!StanPrzycisku_3 && WTime != 0) {
         WTime = WTime - 1000;
         delay(100);
         lcd.clear();
@@ -141,16 +142,16 @@ void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 
       lcd.print("Czas trw.prg:");
       lcd.setCursor(0,1);
       lcd.print("<- OK +> "+ Stme + "[min]"); delay(140);
-      if (StanPrzycisku_2){delay(140); znacznik_opcji = 1;delay(140);}break;
+      if (!StanPrzycisku_2){delay(140); znacznik_opcji = 1;delay(140);}break;
       /******************************************************************************************************/
     case 1:
-      if (StanPrzycisku_1 && BreakTime <10000) { //jeżeli obydwie wartości są True.
+      if (!StanPrzycisku_1 && BreakTime <20000) { //jeżeli obydwie wartości są True.
         BreakTime = BreakTime + 1000; //1000 to jedna sec
         delay(100);
         lcd.clear();
       }
       
-      if (StanPrzycisku_3 && BreakTime != 0) {
+      if (!StanPrzycisku_3 && BreakTime != 0) {
         BreakTime = BreakTime - 1000;
         delay(100);
         lcd.clear();
@@ -164,7 +165,7 @@ void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 
       lcd.print("Zm.kier.obr.co:");
       lcd.setCursor(0,1);
       lcd.print("<-  OK  +> " + Stme + "[s]"); delay(140);
-      if (StanPrzycisku_2){
+      if (!StanPrzycisku_2){
         delay(140); 
         znacznik_opcji = 2;
         delay(140);}break;
@@ -174,7 +175,7 @@ void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 
       lcd.print("funkcja");
       lcd.setCursor(0,1);
       lcd.print("<-   Wykonaj    +>"); delay(140);
-      if (StanPrzycisku_2){
+      if (!StanPrzycisku_2){
         delay(140); 
         znacznik_opcji = 3; 
         delay(140);} break;
@@ -212,10 +213,10 @@ void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 
       time2 = millis();
     }
     //kontrola szybkości
-    if (StanPrzycisku_3 && PWM != 0)   { PWM--; delay(10); }
-    if (StanPrzycisku_1 && PWM <= 254) { PWM++; delay(10); }
+    if (!StanPrzycisku_3 && PWM != 0)   { PWM--; delay(10); }
+    if (!StanPrzycisku_1 && PWM <= 254) { PWM++; delay(10); }
     
-    if (StanPrzycisku_2) {break;}
+    if (!StanPrzycisku_2) {break;}
     delay(100); //bez opoznienia nie ma wyswietlania bo tekst nawet nie zdazy sie pojawic na ekranie.
     lcd.clear();
     lcd.setCursor(0,0);
@@ -233,7 +234,7 @@ void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 
   delay(2000);
 }
 void Wywolywanie(){
-    Program("Wywoływanie");
+    Program("Wywolywanie");
 }
 void Przerywanie(){
     Program("Przerywanie");
@@ -249,7 +250,7 @@ void Uzytkownika(){
 }
 void Predefined_D74(){
     Program("Wywolywanie", 5000, 130000);
-    Program("Przerywanie", 5000, 300);
+    Program("Przerywanie", 5000, 600);
     Program("Utrwalanie", 5000, 7000);
-};
+}
 /********************************************************************/
