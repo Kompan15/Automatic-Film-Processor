@@ -7,8 +7,8 @@ using namespace std;
 
 //stale obslugi sterownika silnika
 const int Enable_B = 3;
-const int Wejscie_Sterownika_3 = 1;
-const int Wejscie_Sterownika_4 = 2;
+const int Wejscie_Sterownika_3 = 5;
+const int Wejscie_Sterownika_4 = 4;
 
 
 //stałe przyciskow
@@ -162,8 +162,7 @@ while(!StanPrzycisku_2){ //pętla przyjmujaca czas wykonywania wywolywania
 
    /********************************************************************/
    time1 = millis(); //odebranie czasu do zmiennej, funkcja zwraca naliczone milisekundy od momentu uruchomienia ukladu
-   
-  while((millis()-time1) < WTime*60){ //pętla WYKONANIA FUNKCJI WYWOLANIE przez okreslony czas
+  while(((millis()-time1) < WTime*60) && znacznik_zatwierdzenia){ //pętla WYKONANIA FUNKCJI WYWOLANIE przez okreslony czas
     
   StanPrzycisku_2 = digitalRead(Przycisk_2);
     SPWM = String(PWM);
@@ -174,25 +173,24 @@ while(!StanPrzycisku_2){ //pętla przyjmujaca czas wykonywania wywolywania
     lcd.print("Wywoluje" + Stme + "[s]:" + SPWM); 
     lcd.setCursor(0,1); //drugi wiersz, pierwsza kolumna.
     lcd.print("||  Przerwij  ||");
+    
     //breaker funkcji, można do tego zastosować dowolny przycisk
-    if ((millis()-time1)%500 == 0) {
+    if ((millis()-time1)%50 == 0) {
       komutator = !komutator;
     if (komutator)
     { 
         Serial.println("True");
+        Serial.println("True");
         PWM = 40;
         digitalWrite(Wejscie_Sterownika_3, HIGH);
-        digitalWrite(Wejscie_Sterownika_4, LOW);      
+        digitalWrite(Wejscie_Sterownika_4, LOW);              
     }else
     {
         Serial.println("False");
         PWM = 50;
         digitalWrite(Wejscie_Sterownika_3, LOW);
         digitalWrite(Wejscie_Sterownika_4, HIGH);
-    }}
-    Serial.print("komutator:");
-    Serial.println(komutator);
-    analogWrite(Enable_B, PWM);
+    }analogWrite(Enable_B, PWM);}
     if (StanPrzycisku_2 == HIGH) {
       znacznik_przerwania = 0;
       break;
