@@ -36,7 +36,7 @@ void setup()
 void loop() //pętla główna.
 {
   Menu();
-  Init();
+  Init(); //init wywołuje funkcję program.
 }
 void Menu(){
   int StanPrzycisku_1 = 0;
@@ -95,6 +95,7 @@ void Program(String funkcja){ //string zostaje przejety tylko i wylacznie po to 
   int StanPrzycisku_1 = 0;
   int StanPrzycisku_2 = 0;
   int StanPrzycisku_3 = 0;
+  
   /****************************************************************/
   unsigned int znacznik_opcji = 0; //liczymy do 2 (3 - 0,1,2)
   // bool znacznik_przerwania = 0; //w tym podprogramie nie można przerywać - ograniczenie sprzętowe.
@@ -102,7 +103,7 @@ void Program(String funkcja){ //string zostaje przejety tylko i wylacznie po to 
   bool K1 = 0,K2 = 1; //inicjalnie: false
   unsigned int PWM = 40;
   unsigned long BreakTime = 0, WTime = 0, time1, time2; //lokalny czas funkcji wywolanie.
-  String SPWM, Stme; //PWM,Sekundy w string.
+  String SPWM, Stme, StmeB; //PWM,Sekundy w string.
   lcd.clear(); //czysc ekran przed wejsciem do petli, inaczej wystapia artefakty.
   while(znacznik_opcji != 2){ //pętla przyjmujaca czas wykonywania wywolywania
     //przyciski, bez nich nie wyjdziesz z petli, nie zmienisz czasu.
@@ -162,7 +163,6 @@ void Program(String funkcja){ //string zostaje przejety tylko i wylacznie po to 
       
     case 2:
       lcd.setCursor(4,0);
-      
       lcd.print("funkcja");
       lcd.setCursor(0,1);
       lcd.print("<-   Wykonaj    +>"); delay(140);
@@ -173,35 +173,36 @@ void Program(String funkcja){ //string zostaje przejety tylko i wylacznie po to 
     }
   }
   
-  
-  
-  //sprawdzamy stany przycisków  dekrementujemy bądź inkrementujemy.
-  
   /********************************************************************/
   delay(100); //program czeka 100 ms aby nie 'złapać' stanu przycisku.
   /********************************************************************/
+  
   //odebranie czasu do zmiennej, funkcja zwraca naliczone milisekundy od momentu uruchomienia ukladu
   time1 = millis();//czas wykorzystywany do obliczania czasu trwania programu.
   time2 = millis();//czas wykorzystywany do obliczania czasu trwania obrotu
   while(((millis()-time1) < WTime*60)){ //pętla WYKONANIA FUNKCJI WYWOLANIE przez okreslony czas
     
-    analogWrite(Enable_B, PWM); //uruchom silnik.
+    
     //czytaj stany przycisków
     StanPrzycisku_1 = digitalRead(Przycisk_1);
     StanPrzycisku_2 = digitalRead(Przycisk_2);
     StanPrzycisku_3 = digitalRead(Przycisk_3);
     SPWM = String(PWM); //czytaj od tyłu (prawej) Konwersja na string wartosc PWM i przypisanie do SPWM
     Stme = String((millis() - time1) / 1000);
+    StmeB = String((millis() - time2) / 1000);
     
     //Wykonuj co okreslony czas
     if ((millis()-time2) >= BreakTime) {
-      //inwersja obrotów
+      analogWrite(Enable_B, PWM); //uruchom silnik.
+      //inwersja zmiennych
       K1 = !K1;
       K2 = !K2;
+      //faktyczna inwersja na wyjściach
       digitalWrite(Wejscie_Sterownika_3, K1);
       digitalWrite(Wejscie_Sterownika_4, K2);
       time2 = millis();
     }
+    //kontrola szybkości
     if (StanPrzycisku_3 && PWM != 0)   { PWM--; delay(10); }
     if (StanPrzycisku_1 && PWM <= 254) { PWM++; delay(10); }
     
@@ -209,7 +210,8 @@ void Program(String funkcja){ //string zostaje przejety tylko i wylacznie po to 
     delay(100); //bez opoznienia nie ma wyswietlania bo tekst nawet nie zdazy sie pojawic na ekranie.
     lcd.clear();
     lcd.setCursor(0,0);
-    lcd.print(funkcja +" "+ Stme + "s ");
+    lcd.print(funkcja +" "+ Stme + "s" + StmeB);
+    lcd.leftToRight();
     lcd.setCursor(0,1); //drugi wiersz, pierwsza kolumna.
     lcd.print("<-  Przerwij  +>");
     
