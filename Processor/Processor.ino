@@ -22,9 +22,9 @@ void Uzytkownika();
 void Predefined_D74();
 /*deklaracja tablicy programów - jeden string to jeden obiekt, planowałem zrobić to na wektorach, ale nie są wskazane
 z tak małą ilością pamięci wewnętrznej*/
-String programy[] = {"Wywolywanie", "Przerywanie", "Utrwalanie", "Plukanie", "Uzytkownika", "Predefined D-74"}; 
+String programy[] = {"Wywolywanie", "Przerywanie", "Utrwalanie", "Plukanie", "Predefined D-74"}; 
 //definicja tablicy wskaznikow do programow.
-void (*programy_wskazniki[])(void) = {Wywolywanie, Przerywanie, Utrwalanie, Plukanie, Uzytkownika, Predefined_D74};
+void (*programy_wskazniki[])(void) = {Wywolywanie, Przerywanie, Utrwalanie, Plukanie, Predefined_D74};
 /*ważna informacja: chcesz dodać nową funkcję, dodajesz ją na tym samym indeksie w obydwóch powyzszych tablicach!*/
 void setup()
 {
@@ -113,7 +113,7 @@ void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 
   int StanPrzycisku_2 = 1;
   int StanPrzycisku_3 = 1;
   String SPWM, Stme, StmeB, Secs, Mins; //PWM,Sekundy w string.
-  unsigned int PWM = 40;
+  unsigned int PWM = 150;
   unsigned long czas_ref_trwania_programu, czas_ref_trwania_kierunku_obrotu, minuty = 0; //zmienne czasowe.
   unsigned long konwersja;
   bool K1 = 0,K2 = 1; //inicjalnie: false
@@ -197,6 +197,9 @@ void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 
   //odebranie czasu do zmiennej, funkcja zwraca naliczone milisekundy od momentu uruchomienia ukladu
   czas_ref_trwania_programu = millis();//czas wykorzystywany do obliczania czasu trwania programu.
   czas_ref_trwania_kierunku_obrotu = millis();//czas wykorzystywany do obliczania czasu trwania obrotu
+  analogWrite(Enable_B, PWM);
+  digitalWrite(Wejscie_Sterownika_3, K1);
+  digitalWrite(Wejscie_Sterownika_4, K2);
   while(((millis()-czas_ref_trwania_programu) < WTime*1000)){ //pętla WYKONANIA FUNKCJI przez okreslony czas
     
     //czytaj stany przycisków
@@ -284,4 +287,4 @@ void Predefined_D74(){
   Czekaj();
   Program("Utrwalanie", 5, 420);
 }
-/********************************************************************************************************************************************/
+/******************************************************************************************************************************************/
