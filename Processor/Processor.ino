@@ -70,8 +70,8 @@ void Menu(){
     if (!StanPrzycisku_1) {stanSwitch--;}
     if (!StanPrzycisku_3) {stanSwitch++;}
     //warunek kręcący.
-    if (stanSwitch == 6){stanSwitch = 0;}
-    if (stanSwitch == -1){stanSwitch = 5;}
+    if (stanSwitch == 5){stanSwitch = 0;}
+    if (stanSwitch == -1){stanSwitch = 4;}
     
     lcd.clear();
     lcd.setCursor((16- programy[stanSwitch].length())/2,0);
