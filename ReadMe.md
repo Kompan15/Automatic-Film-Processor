@@ -2,7 +2,7 @@ Automatic Film Processor
 ========================
 
 Project was created over the period of 3 months. Automatic Film Processor is a device that allows 
-you to delegate a wearisome task of rotating film to the machine.
+you to delegate a wearisome task of rotating a film to the machine.
 
 Device includes software, user interface and mechanical parts.
 
