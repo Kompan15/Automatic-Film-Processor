@@ -117,7 +117,7 @@ void Wywolywanie(){
   int StanPrzycisku_3 = 0;
   bool znacznik_przerwania = 1;
   bool znacznik_zatwierdzenia =0; //
-  bool komutator = 0; //inicjalnie: false
+  bool K1 = 1,K2 = 0; //inicjalnie: false
   unsigned int PWM = 55;
   unsigned long WTime = 0,time1, time2; //lokalny czas funkcji wywolanie.
   String SPWM, Stme; //PWM,Sekundy w string.
@@ -178,24 +178,13 @@ while(!StanPrzycisku_2){ //pętla przyjmujaca czas wykonywania wywolywania
     lcd.print("||  Przerwij  ||");
     //breaker funkcji, można do tego zastosować dowolny przycisk
     if ((millis()-time2) >= 4900) {
-      komutator = !komutator;
-    if (komutator)
-    { 
-        Serial.print((millis()-time2));
-        Serial.print(" True ");
-        Serial.println(komutator);
+        K1 = !K1;
+        K2 = !K2;
         PWM = 30;
-        digitalWrite(Wejscie_Sterownika_3, HIGH);
-        digitalWrite(Wejscie_Sterownika_4, LOW);              
-    }else
-    {
-        Serial.print((millis()-time2));
-        Serial.print(" False ");
-        Serial.println(komutator);
-        PWM = 30;
-        digitalWrite(Wejscie_Sterownika_3, LOW);
-        digitalWrite(Wejscie_Sterownika_4, HIGH);
-    }time2 = millis();}
+        digitalWrite(Wejscie_Sterownika_3, K1);
+        digitalWrite(Wejscie_Sterownika_4, K2);              
+        time2 = millis();
+    }
     
     if (StanPrzycisku_2 == HIGH) {
       znacznik_przerwania = 0;
