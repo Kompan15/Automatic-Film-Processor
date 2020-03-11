@@ -13,7 +13,8 @@ const int Przycisk_3 = 10;
 unsigned int stanSwitch = 0; //unsigned, bo nie przyjmuje wartości ujemnych
 //zmienna czasowa.
 unsigned int czas;
-//Deklaracje funkcji, inaczej tablica wskaznikow nie zadziala, kompilator musi wiedziec wczesniej.
+//Deklaracje funkcji, inaczej tablica wskaznikow nie zadziala, kompilator musi wiedziec wczesniej, są to tak zwane deklaracje
+//zapowiadajace (Grebosz s311)
 void Wywolywanie();
 void Przerywanie();
 void Utrwalanie();
@@ -232,6 +233,7 @@ void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 
     //kontrola szybkości
     if (!StanPrzycisku_3 && PWM != 0)   { PWM--; delay(10); }
     if (!StanPrzycisku_1 && PWM <= 254) { PWM++; delay(10); }
+    analogWrite(Enable_B, PWM);
     
     if (!StanPrzycisku_2) {break;}
     delay(100);
@@ -287,4 +289,3 @@ void Predefined_D74(){
   Czekaj();
   Program("Utrwalanie", 5, 420);
 }
-/******************************************************************************************************************************************/
