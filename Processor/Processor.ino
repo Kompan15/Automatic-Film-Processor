@@ -90,7 +90,7 @@ void inicjalizacja(){
   int StanPrzycisku_2 = 0; 
   int StanPrzycisku_3 = 0;
 
-  bool znacznik_przerwania = 0;
+  bool znacznik_przerwania = 1;
   
   unsigned long time1;
   String Stme; //sekundy w stringu.
@@ -104,12 +104,55 @@ void inicjalizacja(){
     lcd.setCursor(0,1); //drugi wiersz, pierwsza kolumna.
     lcd.print("||  Przerwij  ||");
     if (StanPrzycisku_2 == HIGH) {znacznik_przerwania = 0;break;}
-    znacznik_przerwania = 1;
+    
   }
   if(znacznik_przerwania) programy_wskazniki[stanSwitch]();
  }
 
 void Wywolywanie(){
+
+  int StanPrzycisku_1 = 0;
+  int StanPrzycisku_2 = 0; 
+  int StanPrzycisku_3 = 0;
+  bool znacznik_przerwania = 1;
+
+  unsigned long WTime = 0;
+  String Stme; //sekundy w stringu.
+  
+  lcd.clear();
+while(!StanPrzycisku_2){ //pętla przyjmujaca czas wykonywania wywolywania
+  
+  StanPrzycisku_1 = digitalRead(Przycisk_1);
+  StanPrzycisku_2 = digitalRead(Przycisk_2);
+  StanPrzycisku_3 = digitalRead(Przycisk_3);
+
+    if (StanPrzycisku_1 == HIGH && WTime <16000) { WTime = WTime + 1000; delay(100); lcd.clear();}                                        
+    if (StanPrzycisku_3 == HIGH && WTime != 0) { WTime = WTime - 1000; delay(100); lcd.clear();}
+    Stme = String((WTime)/1000);
+    lcd.setCursor(0,0);
+    lcd.print("Czas : " + Stme); 
+    lcd.setCursor(0,1); 
+    lcd.print("<-     OK     +>"); delay(140);
+    if (StanPrzycisku_2 == HIGH) {znacznik_przerwania = 0; break;}
+  }
+  delay(100);
+  while(!StanPrzycisku_2){ //pętla wykonująca Wywolywanie przez okreslony czas
+  
+  StanPrzycisku_1 = digitalRead(Przycisk_1);
+  StanPrzycisku_2 = digitalRead(Przycisk_2);
+  StanPrzycisku_3 = digitalRead(Przycisk_3);
+
+    if (StanPrzycisku_1 == HIGH && WTime <16000) { WTime = WTime + 1000; delay(100); lcd.clear();}                                        
+    if (StanPrzycisku_3 == HIGH && WTime != 0) { WTime = WTime - 1000; delay(100); lcd.clear();}
+    Stme = String((WTime)/1000);
+    lcd.setCursor(0,0);
+    lcd.print("Czas : " + Stme); 
+    lcd.setCursor(0,1); 
+    lcd.print("<-     OK     +>"); delay(140);
+    if (StanPrzycisku_2 == HIGH) {znacznik_przerwania = 0; break;}
+  }
+
+  
   
   }
 void Plukanie(){
@@ -147,6 +190,6 @@ void Uzytkownika(){
     if (StanPrzycisku_1 == HIGH && PWM<=255) { PWM++; delay(100); lcd.clear();}
     lcd.print("PWM:" + String(PWM));
     lcd.setCursor(0,1);
-    lcd.print("||  Przerwij  ||");
+    lcd.print("<-  Przerwij  +>");
 } analogWrite(Enable_B,PWM=0);
   }
