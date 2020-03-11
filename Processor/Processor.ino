@@ -1,4 +1,3 @@
-
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 //I2C pins declaration
@@ -8,18 +7,17 @@ using namespace std;
 
 //stale obslugi sterownika silnika
 const int Enable_B = 3;
-const int Wejscie_Sterownika_3 = 2;
-const int Wejscie_Sterownika_4 = 1;
+const int Wejscie_Sterownika_3 = 1;
+const int Wejscie_Sterownika_4 = 2;
 
 
-//stale przyciskow
+//stałe przyciskow
 const int Przycisk_1 = 8;
 const int Przycisk_2 = 9;
 const int Przycisk_3 = 10;  
 signed int stanSwitch = 0;
 
-//deklaracja zmiennej czasowej
-
+//zmienna czasowa.
 signed int czas;
 //Deklaracje funkcji, inaczej tablica wskaznikow nie zadziala, kompilator musi wiedziec wczesniej.
 void Wywolywanie();
@@ -50,18 +48,18 @@ void setup()
 
 
 lcd.begin(16,2); //defincja 16 segmentów w dwóch rzędach.
-Serial.begin(9600);
+Serial.begin(9600); //rozpocznij komunikację na porcie szeregowym
 }
 
 void loop() //pętla główna.
 {
 
-menu();
-inicjalizacja();
+Menu();
+Init();
 
 }
 
-void menu(){
+void Menu(){
   
   int StanPrzycisku_1 = 0;
   int StanPrzycisku_2 = 0; 
@@ -84,27 +82,30 @@ void menu(){
     }while(!StanPrzycisku_2); //dopóki stan przycisku nie jest HIGH
 }
 
-void inicjalizacja(){
+void Init(){
   
   int StanPrzycisku_1 = 0;
   int StanPrzycisku_2 = 0; 
   int StanPrzycisku_3 = 0;
 
   bool znacznik_przerwania = 1;
+
   
   unsigned long time1;
   String Stme; //sekundy w stringu.
   lcd.clear();
   time1 = millis();
-  while((millis()-time1)<2000){
+  while((millis()-time1)<2000){ //pętla Menu głównego.
     StanPrzycisku_2 = digitalRead(Przycisk_2);
     Stme = String((millis()-time1)/1000);
     lcd.setCursor(0,0);
     lcd.print(programy[stanSwitch] + " za:" + Stme); 
     lcd.setCursor(0,1); //drugi wiersz, pierwsza kolumna.
     lcd.print("||  Przerwij  ||");
-    if (StanPrzycisku_2 == HIGH) {znacznik_przerwania = 0;break;}
-    
+    if (StanPrzycisku_2 == HIGH) {
+      znacznik_przerwania = 0;
+      break;
+      }
   }
   if(znacznik_przerwania) programy_wskazniki[stanSwitch]();
  }
@@ -115,46 +116,98 @@ void Wywolywanie(){
   int StanPrzycisku_2 = 0; 
   int StanPrzycisku_3 = 0;
   bool znacznik_przerwania = 1;
-
-  unsigned long WTime = 0;
-  String Stme; //sekundy w stringu.
+  bool znacznik_zatwierdzenia =0; //
+  bool komutator = 0; //inicjalnie: false
+  unsigned int PWM = 55;
+  unsigned long WTime = 0,time1; //lokalny czas funkcji wywolanie.
+  String SPWM, Stme; //sekundy w stringu.
   
-  lcd.clear();
+ lcd.clear(); //czysc ekran przed wejsciem do petli, inaczej sa artefakty.
+ 
 while(!StanPrzycisku_2){ //pętla przyjmujaca czas wykonywania wywolywania
-  
+
+  //przyciski, bez nich nie wyjdziesz z petli, nie zmienisz czasu.
   StanPrzycisku_1 = digitalRead(Przycisk_1);
   StanPrzycisku_2 = digitalRead(Przycisk_2);
   StanPrzycisku_3 = digitalRead(Przycisk_3);
 
-    if (StanPrzycisku_1 == HIGH && WTime <16000) { WTime = WTime + 1000; delay(100); lcd.clear();}                                        
-    if (StanPrzycisku_3 == HIGH && WTime != 0) { WTime = WTime - 1000; delay(100); lcd.clear();}
+      //sprawdzamy stany przycisków  dekrementujemy bądź inkrementujemy.
+    if (StanPrzycisku_1 == HIGH && WTime <16000) { 
+      WTime = WTime + 1000; 
+      delay(100); 
+      lcd.clear();
+      }          
+                                    
+    if (StanPrzycisku_3 == HIGH && WTime != 0) { 
+      WTime = WTime - 1000; 
+      delay(100); 
+      lcd.clear();
+      }
+      
     Stme = String((WTime)/1000);
+    /*wyswietl panel*/
     lcd.setCursor(0,0);
-    lcd.print("Czas : " + Stme); 
+    lcd.print("Czas : " + Stme + "[min]"); 
     lcd.setCursor(0,1); 
     lcd.print("<-     OK     +>"); delay(140);
-    if (StanPrzycisku_2 == HIGH) {znacznik_przerwania = 0; break;}
-  }
+
+    //breaker pętli odczytu czasu
+    if (StanPrzycisku_2 == HIGH) {
+      znacznik_zatwierdzenia = 1; //znacznik zatwierdzenia to nie znacznik przerwania.
+      break;
+    }   
+  }/********************************************************************/
+  
+  delay(100); //program czeka 100 ms aby nie złapać stanu przycisku.
+
+   /********************************************************************/
+   time1 = millis(); //odebranie czasu do zmiennej, funkcja zwraca naliczone milisekundy od momentu uruchomienia ukladu
+   
+  while((millis()-time1) < WTime*60){ //pętla WYKONANIA FUNKCJI WYWOLANIE przez okreslony czas
+    
+  StanPrzycisku_2 = digitalRead(Przycisk_2);
+    SPWM = String(PWM);
+    Stme = String((millis()-time1)/1000);
+    //delay(100); //bez opoznienia nie ma wyswietlania bo tekst nawet nie zdazy sie pojawic na ekranie.
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Wywoluje" + Stme + "[s]:" + SPWM); 
+    lcd.setCursor(0,1); //drugi wiersz, pierwsza kolumna.
+    lcd.print("||  Przerwij  ||");
+    //breaker funkcji, można do tego zastosować dowolny przycisk
+    if ((millis()-time1)%500 == 0) {
+      komutator = !komutator;
+    if (komutator)
+    { 
+        Serial.println("True");
+        PWM = 40;
+        digitalWrite(Wejscie_Sterownika_3, HIGH);
+        digitalWrite(Wejscie_Sterownika_4, LOW);      
+    }else
+    {
+        Serial.println("False");
+        PWM = 50;
+        digitalWrite(Wejscie_Sterownika_3, LOW);
+        digitalWrite(Wejscie_Sterownika_4, HIGH);
+    }}
+    Serial.print("komutator:");
+    Serial.println(komutator);
+    analogWrite(Enable_B, PWM);
+    if (StanPrzycisku_2 == HIGH) {
+      znacznik_przerwania = 0;
+      break;
+      }
+  }analogWrite(Enable_B,PWM=0);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Zakonczono"); 
+  lcd.setCursor(0,1); //drugi wiersz, pierwsza kolumna.
+  lcd.print("Wywolywanie");
   delay(100);
-  while(!StanPrzycisku_2){ //pętla wykonująca Wywolywanie przez okreslony czas
+}
   
-  StanPrzycisku_1 = digitalRead(Przycisk_1);
-  StanPrzycisku_2 = digitalRead(Przycisk_2);
-  StanPrzycisku_3 = digitalRead(Przycisk_3);
-
-    if (StanPrzycisku_1 == HIGH && WTime <16000) { WTime = WTime + 1000; delay(100); lcd.clear();}                                        
-    if (StanPrzycisku_3 == HIGH && WTime != 0) { WTime = WTime - 1000; delay(100); lcd.clear();}
-    Stme = String((WTime)/1000);
-    lcd.setCursor(0,0);
-    lcd.print("Czas : " + Stme); 
-    lcd.setCursor(0,1); 
-    lcd.print("<-     OK     +>"); delay(140);
-    if (StanPrzycisku_2 == HIGH) {znacznik_przerwania = 0; break;}
-  }
-
+    /********************************************************************/
   
-  
-  }
 void Plukanie(){
   
   }
