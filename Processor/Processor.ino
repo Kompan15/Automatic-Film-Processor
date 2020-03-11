@@ -86,7 +86,7 @@ void Init(){
   int StanPrzycisku_2 = 0; //inicjalizacja wartości zmiennej przechowującej stan przycisku na False(0)
   bool znacznik_przerwania = 0; 
   unsigned long czas_na_przerwanie;
-  String Stme; //sekundy w stringu.
+  String Stme; //czas w stringu.
   lcd.clear();
   czas_na_przerwanie = millis();
   while((millis()-czas_na_przerwanie)<2000){ //pętla Menu głównego.
@@ -112,9 +112,10 @@ void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 
   int StanPrzycisku_1 = 1;
   int StanPrzycisku_2 = 1;
   int StanPrzycisku_3 = 1;
-  String SPWM, Stme, StmeB; //PWM,Sekundy w string.
+  String SPWM, Stme, StmeB, Secs, Mins; //PWM,Sekundy w string.
   unsigned int PWM = 40;
   unsigned long czas_ref_trwania_programu, czas_ref_trwania_kierunku_obrotu, minuty = 0; //zmienne czasowe.
+  unsigned long konwersja;
   bool K1 = 0,K2 = 1; //inicjalnie: false
   if (!BreakTime && !WTime){ //warunek sprawdzający czy argumenty zostały domniemane czy nie.
   unsigned int znacznik_opcji = 0; //liczymy do 2 (3 - 0,1,2)
@@ -128,19 +129,19 @@ void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 
     /******************************************************************************************************/      
     switch(znacznik_opcji){ //switch case
     case 0:
-      if (!StanPrzycisku_1 && WTime <16000) { //jeżeli obydwie wartości są True.
-        WTime = WTime + 1000; //1000 to jedna sec
+      if (!StanPrzycisku_1 && WTime <960) { //jeżeli obydwie wartości są True.
+        WTime = WTime + 60; //1000 to jedna sec
         delay(100);
         lcd.clear();
       }
       
       if (!StanPrzycisku_3 && WTime != 0) {
-        WTime = WTime - 1000;
+        WTime = WTime - 60;
         delay(100);
         lcd.clear();
       }
       
-      Stme = String((WTime)/1000);
+      Stme = String((WTime)/60);
       
       /* wyswietl panel */
       
@@ -151,19 +152,19 @@ void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 
       if (!StanPrzycisku_2){delay(140); znacznik_opcji = 1; delay(140);}break;
       /******************************************************************************************************/
     case 1:
-      if (!StanPrzycisku_1 && BreakTime <20000) { //jeżeli obydwie wartości są True.
-        BreakTime = BreakTime + 1000; //1000 to jedna sec
+      if (!StanPrzycisku_1 && BreakTime < 20) { //jeżeli obydwie wartości są True.
+        BreakTime = BreakTime + 1;
         delay(100);
         lcd.clear();
       }
       
       if (!StanPrzycisku_3 && BreakTime != 0) {
-        BreakTime = BreakTime - 1000;
+        BreakTime = BreakTime - 1;
         delay(100);
         lcd.clear();
       }
       
-      Stme = String((BreakTime)/1000);
+      Stme = String((BreakTime));
       
       /* wyswietl panel */
       
@@ -196,27 +197,26 @@ void Program(String funkcja, unsigned long BreakTime = 0, unsigned long WTime = 
   //odebranie czasu do zmiennej, funkcja zwraca naliczone milisekundy od momentu uruchomienia ukladu
   czas_ref_trwania_programu = millis();//czas wykorzystywany do obliczania czasu trwania programu.
   czas_ref_trwania_kierunku_obrotu = millis();//czas wykorzystywany do obliczania czasu trwania obrotu
-  while(((millis()-czas_ref_trwania_programu) < WTime*60)){ //pętla WYKONANIA FUNKCJI przez okreslony czas
-    
+  while(((millis()-czas_ref_trwania_programu) < WTime*1000)){ //pętla WYKONANIA FUNKCJI przez okreslony czas
     
     //czytaj stany przycisków
     StanPrzycisku_1 = digitalRead(Przycisk_1);
     StanPrzycisku_2 = digitalRead(Przycisk_2);
     StanPrzycisku_3 = digitalRead(Przycisk_3);
     SPWM = String(PWM); //czytaj od tyłu (prawej) Konwersja na string wartosc PWM i przypisanie do SPWM
+    konwersja = (abs(((millis() - czas_ref_trwania_programu) / 1000) - 60 * minuty));
+    if (minuty < 10){
+      Mins = String("0") + String(minuty) + String(":");
+    }else Mins = String(minuty) + String(":");
     
-    if (abs(((millis() - czas_ref_trwania_programu) / 1000) - 60 * minuty) <= 10){
-      Stme = String("0") + String(minuty)+ String(":0") + String(abs(((millis() - czas_ref_trwania_programu) / 1000) - 60 * minuty));
-    }else if (minuty >= 10){
-      
-      Stme = String(minuty)+ String(":") + String(abs(((millis() - czas_ref_trwania_programu) / 1000) - 60 * minuty)); // dzielę przez 1000 bo wyświetlam sekundy.
-      
-    }else Stme = String(minuty)+ String(":") + String(abs(((millis() - czas_ref_trwania_programu) / 1000) - 60 * minuty));
-    
-    if (abs(((millis() - czas_ref_trwania_programu) / 1000) - 60 * minuty) >= 60){minuty++;}
+    if (konwersja < 10){
+      Secs = String("0") + String(konwersja);
+    }else Secs = String(konwersja);
+    Stme = Mins+Secs;
+    if (konwersja >= 60){minuty++;}
     
     //Wykonuj co okreslony czas
-    if ((millis()-czas_ref_trwania_kierunku_obrotu) >= BreakTime) {
+    if ((millis()-czas_ref_trwania_kierunku_obrotu) >= BreakTime*1000) {
       analogWrite(Enable_B, PWM); //uruchom silnik.
       //inwersja zmiennych
       K1 = !K1;
@@ -263,10 +263,25 @@ void Plukanie(){
 void Uzytkownika(){
     Program("Uzytkownika");
 }
+void Czekaj(){
+  int StanPrzycisku_2 = 1;
+  do{
+    //czytaj stany przycisków a następnie przypisz je do zmiennych.
+    StanPrzycisku_2 = digitalRead(Przycisk_2);
+    lcd.clear();
+    lcd.setCursor(4,0);
+    lcd.print("Czekam...");
+    lcd.setCursor(0,1);
+    lcd.print("<<   Dalej    >>"); delay(140);
+  }while(StanPrzycisku_2); //dopóki stan przycisku jest HIGH
+  delay(100);
+}
 //argumenty podawać w kolejności: Czas po którym zostanie zmieniony kierunek obrotów, czas trwania programu.
 void Predefined_D74(){
-    Program("Wywolywanie", 5000, 13000);
-    Program("Przerywanie", 5000, 600);
-    Program("Utrwalanie", 5000, 7000);
+  Program("Wywolywanie", 5, 780);
+  Czekaj();
+  Program("Przerywanie", 5, 30);
+  Czekaj();
+  Program("Utrwalanie", 5, 420);
 }
 /********************************************************************************************************************************************/
