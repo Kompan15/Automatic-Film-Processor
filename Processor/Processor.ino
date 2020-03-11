@@ -119,8 +119,8 @@ void Wywolywanie(){
   bool znacznik_zatwierdzenia =0; //
   bool komutator = 0; //inicjalnie: false
   unsigned int PWM = 55;
-  unsigned long WTime = 0,time1; //lokalny czas funkcji wywolanie.
-  String SPWM, Stme; //sekundy w stringu.
+  unsigned long WTime = 0,time1, time2; //lokalny czas funkcji wywolanie.
+  String SPWM, Stme; //PWM,Sekundy w string.
   
  lcd.clear(); //czysc ekran przed wejsciem do petli, inaczej sa artefakty.
  
@@ -161,47 +161,54 @@ while(!StanPrzycisku_2){ //pętla przyjmujaca czas wykonywania wywolywania
   delay(100); //program czeka 100 ms aby nie złapać stanu przycisku.
 
    /********************************************************************/
-   time1 = millis(); //odebranie czasu do zmiennej, funkcja zwraca naliczone milisekundy od momentu uruchomienia ukladu
+    //odebranie czasu do zmiennej, funkcja zwraca naliczone milisekundy od momentu uruchomienia ukladu
+    time1 = millis();//czas wykorzystywany do obliczania czasu trwania programu.
+    time2 = millis();//czas wykorzystywany do obliczania czasu trwania obrotu
   while(((millis()-time1) < WTime*60) && znacznik_zatwierdzenia){ //pętla WYKONANIA FUNKCJI WYWOLANIE przez okreslony czas
-    
+    analogWrite(Enable_B, PWM);
   StanPrzycisku_2 = digitalRead(Przycisk_2);
     SPWM = String(PWM);
     Stme = String((millis()-time1)/1000);
-    //delay(100); //bez opoznienia nie ma wyswietlania bo tekst nawet nie zdazy sie pojawic na ekranie.
+    
+    delay(100); //bez opoznienia nie ma wyswietlania bo tekst nawet nie zdazy sie pojawic na ekranie.
     lcd.clear();
     lcd.setCursor(0,0);
-    lcd.print("Wywoluje" + Stme + "[s]:" + SPWM); 
+    lcd.print("Wywoluje " + Stme + "s"); 
     lcd.setCursor(0,1); //drugi wiersz, pierwsza kolumna.
     lcd.print("||  Przerwij  ||");
-    
     //breaker funkcji, można do tego zastosować dowolny przycisk
-    if ((millis()-time1)%50 == 0) {
+    if ((millis()-time2) >= 4900) {
       komutator = !komutator;
     if (komutator)
     { 
-        Serial.println("True");
-        Serial.println("True");
-        PWM = 40;
+        Serial.print((millis()-time2));
+        Serial.print(" True ");
+        Serial.println(komutator);
+        PWM = 30;
         digitalWrite(Wejscie_Sterownika_3, HIGH);
         digitalWrite(Wejscie_Sterownika_4, LOW);              
     }else
     {
-        Serial.println("False");
-        PWM = 50;
+        Serial.print((millis()-time2));
+        Serial.print(" False ");
+        Serial.println(komutator);
+        PWM = 30;
         digitalWrite(Wejscie_Sterownika_3, LOW);
         digitalWrite(Wejscie_Sterownika_4, HIGH);
-    }analogWrite(Enable_B, PWM);}
+    }time2 = millis();}
+    
     if (StanPrzycisku_2 == HIGH) {
       znacznik_przerwania = 0;
       break;
       }
-  }analogWrite(Enable_B,PWM=0);
+  }analogWrite(Enable_B,PWM=0); //zerujemy PWM dla bezpieczenstwa.
+  
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("Zakonczono"); 
   lcd.setCursor(0,1); //drugi wiersz, pierwsza kolumna.
   lcd.print("Wywolywanie");
-  delay(100);
+  delay(1000);
 }
   
     /********************************************************************/
